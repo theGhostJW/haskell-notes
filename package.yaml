@@ -24,7 +24,7 @@ ghc-options:
   - -ferror-spans
   - -O2
   - -Wall
-  - -Werror
+  #- -Werror
   - -fprint-potential-instances
   - -Wcompat
   - -Wincomplete-record-updates
@@ -94,6 +94,8 @@ library:
     - containers
     - extra
     - transformers-either
+    - random
+    - mtl
 
 tests:
   HaskellNotes-test:
