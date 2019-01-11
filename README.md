@@ -1,3 +1,3 @@
 # Haskell Notes
 
-Various topics (mostly attributed cut and paste) that I've found interesting / perplexing - see wiki
+Various topics (mostly attributed cut and paste) that I've found interesting / perplexing - see [wiki](https://github.com/theGhostJW/haskell-notes/wiki)
