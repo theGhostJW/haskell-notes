@@ -171,7 +171,7 @@ genRandomR range = state (randomR range)
   then the type of genRandom becomes:
 -}
 
-genRandom' :: (Random a, RandomGen g) => State g a
+genRandom' :: {- (Random a, RandomGen g) => -} State g a
 genRandom' = undefined
 
 {-
