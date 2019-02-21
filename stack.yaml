@@ -18,7 +18,7 @@
 #
 # resolver: ./custom-snapshot.yaml
 # resolver: https://example.com/snapshots/2018-01-01.yaml
-resolver: nightly-2018-08-07
+resolver: nightly-2018-05-30 # last nightly for GHC 8.4.2
 
 # User packages to be built.
 # Various formats can be used as shown in the example below.
