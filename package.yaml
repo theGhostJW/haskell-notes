@@ -89,6 +89,8 @@ library:
   dependencies:
     - base >= 4.7 && < 5
     - foundation
+    - basement
+    - text
     - freer-simple
     - principled-extended
     - containers
@@ -96,20 +98,3 @@ library:
     - transformers-either
     - random
     - mtl
-
-tests:
-  HaskellNotes-test:
-    main:                driver.hs
-    source-dirs:         test
-    ghc-options:
-    - -threaded
-    - -rtsopts
-    - -with-rtsopts=-N
-    dependencies:
-    - tasty
-    - tasty-hunit
-    - tasty-hedgehog
-    - tasty-discover
-    - hedgehog
-    - pyrethrum
-    - listsafe
