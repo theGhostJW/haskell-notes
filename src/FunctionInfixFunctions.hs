@@ -28,6 +28,11 @@ import qualified Data.Text as T
 
 -}
 
+fullName :: String -> String -> String -> String
+fullName fstn othn surn = fstn <> " " <> othn <> " " <> surn
+
+
+
 allCaps :: String -> String
 allCaps = upper
 
