@@ -72,6 +72,43 @@ i1 ++++ i2 = i1 + i2
 
 -}
 
+s :: Integer
+s = 1 - 2 - 3 - 4
+-- parsed as : 
+{-
+╬╗>  s
+-8
+-}
+
+p :: Integer
+p = 2 ^ (3 :: Word64) ^ (4 :: Word64)
+{-
+╬╗> p
+2417851639229258349412352
+-}
+
+--  b :: Bool
+ -- b = True == True == False == False
+{-
+Precedence parsing error
+    cannot mix `==' [infix 4] and `==' [infix 4] in the same infix expression(undefined)
+-}
+
+b1 :: Bool
+b1 = (True == True) == (False == False)
+{-
+╬╗> b1
+True
+-}
+
+
+-- parsed as : 
+{-
+╬╗>  s
+-8
+-}
+
+
 
 
 allCaps :: String -> String
