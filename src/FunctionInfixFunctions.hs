@@ -31,6 +31,47 @@ import qualified Data.Text as T
 fullName :: String -> String -> String -> String
 fullName fstn othn surn = fstn <> " " <> othn <> " " <> surn
 
+{-
+╬╗> fullName "Robert" "Louis" "Stevenson"
+"Robert Louis Stevenson"
+-}
+
+fullRobert :: String -> String -> String
+fullRobert = fullName "Robert"
+
+{-
+╬╗> fullRobert "Roy" "MacGregor"
+"Robert Roy MacGregor"
+-}
+
+fullRobertL :: String -> String
+fullRobertL = fullName "Robert" "Louis Balfour"
+
+{-
+╬╗> fullRobertL "Stevenson"
+"Robert Louis Balfour Stevenson"
+-}
+
+addEm :: Int -> Int -> Int
+addEm i1 i2 = i1 + i2
+
+(++++) :: Int -> Int -> Int
+i1 ++++ i2 = i1 + i2 
+{-
+╬╗> addEm 2 3
+5
+
+╬╗> 2 ++++ 3
+5
+
+╬╗> 2 `addEm` 3
+5
+
+╬╗> (++++) 2 3
+5
+
+-}
+
 
 
 allCaps :: String -> String
@@ -81,11 +122,11 @@ guitars schlRoleName =
                     h :: String
                     h = " Hendrix"
                  
-                    fullName :: String -> String -> String
-                    fullName gvn sur = (toS . T.strip $ toS gvn) <> sur
+                    fullNme :: String -> String -> String
+                    fullNme gvn sur = (toS . T.strip $ toS gvn) <> sur
                   in
                     case S.splitOn (',' ==) schlRoleName of 
-                      [_, g] -> fullName g h
+                      [_, g] -> fullNme g h
                       _ -> "Unexpected Name Format"
 
 _guitars = guitars "Minogue, Kylie"
