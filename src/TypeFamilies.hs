@@ -114,3 +114,7 @@ demoP1 = head' personList
 -- does not compile wow !! So can declare local class constraints 
 -- on a function and still can create type class
 -- demoP2 = minimum' personList
+
+-- segway all / any does it  blow up ? => no makes sense
+demoAll = P.all (> 1) []  -- True
+demoAny = P.any (> 1) []  -- False
