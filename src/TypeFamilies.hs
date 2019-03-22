@@ -1,9 +1,12 @@
 module TypeFamilies where
 
 import Data.Text as T
-import Data.List
+import Data.List as L
 import Data.Char
 import Data.Int
+import Data.Ord
+import Data.String
+import Prelude as P
 
 -- functional dependencies
 
@@ -87,3 +90,27 @@ demoTypeFamInt = consTF 1 [2,3,4,5,6]
 [1,2,3,4,5,6]
 -}
 
+
+
+--- an aside type class functions with constraints -- 
+
+class Ordy m a | m -> a where
+  head' :: m -> a 
+  minimum' :: Ord a => m -> a 
+
+instance Ordy [a] a where
+  head' :: [a]  -> a 
+  head' = L.head
+
+  minimum' :: Ord a => [a]  -> a 
+  minimum' = L.minimum
+
+newtype Person = Person String deriving Show
+
+personList = [Person "Sid", Person "Nancy"]
+numList = [1, 2, 3, 4, 5]
+
+demoP1 = head' personList
+-- does not compile wow !! So can declare local class constraints 
+-- on a function and still can create type class
+-- demoP2 = minimum' personList
