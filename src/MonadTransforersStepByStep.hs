@@ -109,8 +109,11 @@ eval2a env (App e1 e2)   =   do  val1  <- eval2a env e1
                                     FunVal env' n body ->
                                        eval2a (Map.insert n val2 env') body
 
-demoFail = runEval2 (eval2a Map.empty (Plus (Lit 1) (Abs "x" (Var "x")))) 
-demoFail2 = runEval2 (eval2a Map.empty (Var "x")) 
+patternMatchErr = Plus (Lit 1) (Abs "x" (Var "x"))
+demoFail = runEval2 $ eval2a Map.empty patternMatchErr
+
+undefinedVar = Var "x"
+demoFail2 = runEval2 $ eval2a Map.empty undefinedVar
 
 -- ╬╗> demoFail
 -- *** Exception: Pattern match failure in do expression
@@ -180,3 +183,156 @@ demo3 = runEval3 Map.empty (eval3 exampleExp)
 
 
 -- 2.4 Adding State
+
+type Eval4 alpha = ReaderT Env (ExceptT String (StateT Integer Identity)) alpha
+
+
+-- note the m always on inside of run stATEMENTS
+runEval4 :: Env -> Integer -> Eval4 alpha -> (Either String alpha, Integer)
+runEval4 env i m = runIdentity $ runStateT (runExceptT . runReaderT m $ env) i
+
+-- log count for numbe of operations
+-- use modify from monad state
+tick :: (Num s, MonadState s m) => m ()
+tick  = modify (+1)
+
+-- eval4               ::  Exp -> Eval4 Value
+eval4 (Lit i)       =   do  tick
+                            pure $ IntVal i
+
+eval4 (Var n)       =   do  tick
+                            env <- ask
+                            case Map.lookup n env of
+                               Nothing -> throwError ("unbound variable: " ++ n)
+                               Just val -> pure val
+
+eval4 (Plus e1 e2)  =   do  tick
+                            e1'  <- eval4 e1
+                            e2'  <- eval4 e2
+                            case (e1', e2') of
+                              (IntVal i1, IntVal i2) ->
+                                  pure $ IntVal (i1 + i2)
+                              _ -> throwError "type error in addition"
+
+eval4 (Abs n e)     =   do  tick
+                            env <- ask
+                            pure $ FunVal env n e
+
+eval4 (App e1 e2)   =   do  tick
+                            val1  <- eval4 e1
+                            val2  <- eval4 e2
+                            case val1 of
+                                FunVal env' n body ->
+                                  local (const (Map.insert n val2 env')) (eval4 body)
+                                _ -> throwError "type error in application"
+
+demo4 = runEval4 Map.empty 0  $ eval4 exampleExp
+demoFail4 = runEval4 Map.empty 0 $ eval4 patternMatchErr
+
+-- ╬╗> demo4
+-- (Right (IntVal 18),8)
+
+-- ╬╗> demoFail4
+-- (Left "type error in addition",3)
+
+type Eval4' alpha = ReaderT Env (StateT Integer (ExceptT String Identity)) alpha
+
+runEval4' ::  Env -> Integer -> Eval4' alpha -> Either String (alpha, Integer)
+runEval4' env st m  =  runIdentity (runExceptT (runStateT (runReaderT m env) st))
+
+demo4' = runEval4' Map.empty 0 $ eval4 exampleExp
+demoFail4' = runEval4' Map.empty 0 $ eval4 patternMatchErr
+
+-- ╬╗> demo4'
+-- Right (IntVal 18,8)
+
+-- ╬╗> demoFail4'
+-- Left "type error in addition"
+
+-- 2.5 Adding Logging
+
+type Eval5 alpha = ReaderT Env (ExceptT String (WriterT [String] (StateT Integer Identity))) alpha
+
+runEval5 ::  Env -> Integer -> Eval5 alpha -> ((Either String alpha, [String]), Integer)
+runEval5 env st m =  runIdentity $ runStateT (runWriterT . runExceptT $ runReaderT m env) st 
+
+eval5               ::  Exp -> Eval5 Value
+eval5 (Lit i)       =   do  tick
+                            tell ["Lit"]
+                            pure $ IntVal i
+
+eval5 (Var n)       =   do  tick
+                            tell ["Var " <> n]
+                            env <- ask
+                            case Map.lookup n env of
+                               Nothing -> throwError ("unbound variable: " ++ n)
+                               Just val -> pure val
+
+eval5 (Plus e1 e2)  =   do  tick
+                            tell ["Plus"]
+                            e1'  <- eval5 e1
+                            e2'  <- eval5 e2
+                            case (e1', e2') of
+                              (IntVal i1, IntVal i2) -> pure $ IntVal (i1 + i2)
+                              _ -> throwError "type error in addition"
+
+eval5 (Abs n e)     =   do  tick
+                            tell ["ABS"]
+                            env <- ask
+                            pure $ FunVal env n e
+
+eval5 (App e1 e2)   =   do  tick
+                            tell ["App"]
+                            val1  <- eval5 e1
+                            val2  <- eval5 e2
+                            case val1 of
+                              FunVal env' n body ->
+                                  local (const (Map.insert n val2 env'))
+                                    (eval5 body)
+                              _ -> throwError "type error in application"
+
+demo5 = runEval5 Map.empty 0  $ eval5 exampleExp
+demoFail5 = runEval5 Map.empty 0 $ eval5 patternMatchErr
+
+-- What about I/O?
+-- Fortunately, the monad transformer library provides us with the infrastructure to easily integrate I/O operations
+-- into our framework: we simply substitute IO where we have used Identity!
+
+type Eval6 alpha = ReaderT Env (ExceptT String (WriterT [String] (StateT Integer IO))) alpha
+
+runEval6 :: Env -> Integer -> Eval6 alpha -> IO ((Either String alpha, [String]), Integer)
+runEval6 env st ev  = runStateT (runWriterT (runExceptT (runReaderT ev env))) st
+
+eval6               ::  Exp -> Eval6 Value
+eval6 (Lit i)       =   do  tick
+                            liftIO $ print i
+                            return $ IntVal i
+
+eval6 (Var n)       =   do  tick
+                            tell [n]
+                            env <- ask
+                            case Map.lookup n env of
+                               Nothing -> throwError ("unbound variable: " ++ n)
+                               Just val -> return val
+
+eval6 (Plus e1 e2)  =   do  tick
+                            e1'  <- eval6 e1
+                            e2'  <- eval6 e2
+                            case (e1', e2') of
+                              (IntVal i1, IntVal i2) ->
+                                  return $ IntVal (i1 + i2)
+                              _ -> throwError "type error in addition"
+
+eval6 (Abs n e)     =   do  tick
+                            env <- ask
+                            return $ FunVal env n e
+
+eval6 (App e1 e2)   =   do  tick
+                            val1  <- eval6 e1
+                            val2  <- eval6 e2
+                            case val1 of
+                              FunVal env' n body -> local (const (Map.insert n val2 env')) (eval6 body)
+                              _ -> throwError "type error in application"
+
+demo6 = runEval6 Map.empty 0  $ eval6 exampleExp
+demoFail6 = runEval6 Map.empty 0 $ eval6 patternMatchErr
