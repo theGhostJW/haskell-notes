@@ -118,3 +118,5 @@ demoP1 = head' personList
 -- segway all / any does it  blow up ? => no makes sense
 demoAll = P.all (> 1) []  -- True
 demoAny = P.any (> 1) []  -- False
+
+tst = index "ch" 2

@@ -239,7 +239,3 @@ _goBeserk = upper . shoutItOutLoud . guitars $ oilsRole "Minogue"
 _goBeserk0 = upper . shoutItOutLoud . guitars . oilsRole $ "Minogue"
 -- "PETER HENDRIX !!!!!!!! <-- I'M SHOUTING"
 -- _goBeserk00 = (upper . shoutItOutLoud . guitars . oilsRole) "Minogue"
-
-
-
-
