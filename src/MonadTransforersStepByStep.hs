@@ -31,12 +31,13 @@ data Value  =  IntVal Integer        -- integer
 
 type Env = Map.Map Name Value -- mapping from names to values
 
-
+{- DOn't Compile anymore due to chanes in ghc
 -- no monads
 
 -- my function to make the warning go away
 evalInt ::  Env -> Exp -> Integer
 evalInt = undefined
+
 
 -- interpreter
 eval0                   ::  Env -> Exp -> Value
@@ -61,6 +62,7 @@ eval0 env (App e1 e2)   =   let
 exampleExp = Lit 12 `Plus` App (Abs "x" (Var "x")) (Lit 4 `Plus` Lit 2)
 exmp0 = eval0 Map.empty exampleExp 
 
+
 -- ╬╗> exampleExp
 -- IntVal 18
 
@@ -70,6 +72,7 @@ type Eval1 alpha = Identity alpha
 
 runEval1 ::  Eval1 alpha -> alpha
 runEval1 = runIdentity
+
 
 eval1                   ::  Env -> Exp -> Identity Value
 eval1 env (Lit i)       =   pure $ IntVal i
@@ -89,12 +92,15 @@ eval1 env (App e1 e2)   =   do
 
 exmp1 = runIdentity $ eval1 Map.empty exampleExp 
 
+
 -- 2.2 Adding Error Handling
 
 type Eval2 alpha = ExceptT String Identity alpha
 
 runEval2 :: Eval2 alpha -> Either String alpha
 runEval2 ev = runIdentity $ runExceptT ev
+
+{- no longer compiles since does not have Monad Fail -}
 
 eval2a                   ::  Env -> Exp -> Eval2 Value
 eval2a env (Lit i)       =   pure $ IntVal i
@@ -109,11 +115,18 @@ eval2a env (App e1 e2)   =   do  val1  <- eval2a env e1
                                     FunVal env' n body ->
                                        eval2a (Map.insert n val2 env') body
 
+
+
 patternMatchErr = Plus (Lit 1) (Abs "x" (Var "x"))
+
+{-
+- no longer compiles since does not have Monad Fail
+
 demoFail = runEval2 $ eval2a Map.empty patternMatchErr
 
 undefinedVar = Var "x"
 demoFail2 = runEval2 $ eval2a Map.empty undefinedVar
+-}
 
 -- ╬╗> demoFail
 -- *** Exception: Pattern match failure in do expression
@@ -336,3 +349,5 @@ eval6 (App e1 e2)   =   do  tick
 
 demo6 = runEval6 Map.empty 0  $ eval6 exampleExp
 demoFail6 = runEval6 Map.empty 0 $ eval6 patternMatchErr
+
+-}
