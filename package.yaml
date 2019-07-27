@@ -98,3 +98,4 @@ library:
     - transformers-either
     - random
     - mtl
+    - polysemy
