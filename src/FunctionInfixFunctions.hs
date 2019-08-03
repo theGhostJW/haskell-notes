@@ -1,9 +1,8 @@
 module FunctionInfixFunctions where
 
-import           Foundation.Extended
-import qualified Prelude             as P
-import Basement.String as S
-import qualified Data.Text as T
+import Prelude             as P
+import Data.Text as T
+import Data.Bool
 
 -- Precedence Levels 0 - 9 where 9 is the stickyest
 
@@ -28,7 +27,7 @@ import qualified Data.Text as T
 
 -}
 
-fullName :: String -> String -> String -> String
+fullName :: Text -> Text -> Text -> Text
 fullName fstn othn surn = fstn <> " " <> othn <> " " <> surn
 
 {-
@@ -36,7 +35,7 @@ fullName fstn othn surn = fstn <> " " <> othn <> " " <> surn
 "Robert Louis Stevenson"
 -}
 
-fullRobert :: String -> String -> String
+fullRobert :: Text -> Text -> Text
 fullRobert = fullName "Robert"
 
 {-
@@ -44,7 +43,7 @@ fullRobert = fullName "Robert"
 "Robert Roy MacGregor"
 -}
 
-fullRobertL :: String -> String
+fullRobertL :: Text -> Text
 fullRobertL = fullName "Robert" "Louis Balfour"
 
 {-
@@ -81,7 +80,7 @@ s = 1 - 2 - 3 - 4
 -}
 
 p :: Integer
-p = 2 ^ (3 :: Word64) ^ (4 :: Word64)
+p = 2 ^ (3 :: Integer) ^ (4 :: Integer)
 {-
 ╬╗> p
 2417851639229258349412352
@@ -108,17 +107,14 @@ True
 -8
 -}
 
-
-
-
-allCaps :: String -> String
-allCaps = upper
+allCaps :: Text -> Text
+allCaps = toUpper
 
 _allCaps = allCaps "Kylie"
 -- >>> allCaps "Kylie"
 -- "KYLIE"
 
-shoutIt :: Bool -> String -> String
+shoutIt :: Bool -> Text -> Text
 shoutIt loud wrds = wrds <> bool " !" " !!!!!!!!" loud <> " <-- i'm shouting"
 
 _shoutItTrue = shoutIt True "Kylie"
@@ -130,15 +126,15 @@ _shoutItFalse = shoutIt False "Kylie"
 -- "Kylie ! <-- i'm shouting"
 
 
-{-# ANN shoutItOutLoud ("HLint: ignore Eta reduce" :: P.String) #-}
-shoutItOutLoud :: String -> String 
+{-# ANN shoutItOutLoud ("HLint: ignore Eta reduce" :: Text) #-}
+shoutItOutLoud :: Text -> Text 
 shoutItOutLoud str = shoutIt True str
 
 _shoutItOutLoud = shoutItOutLoud "Kylie"
 -- >>> shoutItOutLoud "Kylie"
 -- "Kylie !!!!!!!! <-- i'm shouting"
 
-schoolRole :: String -> String -> String
+schoolRole :: Text -> Text -> Text
 schoolRole givenName surname = surname <> ", " <> givenName
 
 _schoolRole = schoolRole "Kylie" "Minogue"
@@ -146,25 +142,22 @@ _schoolRole = schoolRole "Kylie" "Minogue"
 -- "Minogue, Kylie"
 
 -- partial application / point free
-oilsRole :: String -> String
+oilsRole :: Text -> Text
 oilsRole = schoolRole "Peter"
 
 _oilsRole = oilsRole "Minogue"
 -- >>> oilsRole "Minogue"
 -- "Minogue, Peter"
 
-guitars :: String -> String
+guitars :: Text -> Text
 guitars schlRoleName = 
-                  let 
-                    h :: String
-                    h = " Hendrix"
-                 
-                    fullNme :: String -> String -> String
-                    fullNme gvn sur = (toS . T.strip $ toS gvn) <> sur
-                  in
-                    case S.splitOn (',' ==) schlRoleName of 
-                      [_, g] -> fullNme g h
-                      _ -> "Unexpected Name Format"
+  let 
+    fullNme :: Text -> Text -> Text
+    fullNme gvn sur = T.strip gvn <> sur
+  in
+    case splitOn "," schlRoleName of 
+      [_, given] -> fullNme given " Hendrix"
+      _ -> "Unexpected Name Format"
 
 _guitars = guitars "Minogue, Kylie"
 -- >>> guitars "Minogue, Kylie"
@@ -172,10 +165,10 @@ _guitars = guitars "Minogue, Kylie"
 
 -- shout it out at school
 -- _shoutItOutAtSchool = shoutItOutLoud schoolRole "Kylie" "Minogue"
--- * Error - The function `shoutItOutLoud' is applied to three arguments, but its type `String -> String' has only one
+-- * Error - The function `shoutItOutLoud' is applied to three arguments, but its type `Text -> Text' has only one
 
 -- _shoutItOutAtSchool = shoutItOutLoud schoolRole $ "Kylie" "Minogue"
--- * Couldn't match expected type `t0 -> t' with actual type `String'
+-- * Couldn't match expected type `t0 -> t' with actual type `Text'
 -- same as 
 -- _shoutItOutAtSchool = shoutItOutLoud schoolRole ("Kylie" "Minogue") <--Nuts
 
@@ -208,8 +201,8 @@ _shoutItOutAtSchool = shoutItOutLoud . schoolRole "Kylie" "Minogue"
 ===
 _shoutItOutAtSchoolc = shoutItOutLoud . (schoolRole "Kylie" "Minogue") <- Nuts
 
-* Couldn't match expected type `a -> String'
-              with actual type `String'
+* Couldn't match expected type `a -> Text'
+              with actual type `Text'
 * Possible cause: `schoolRole' is applied to too many arguments
   In the second argument of `(.)', namely
     `schoolRole "Kylie" "Minogue"'
@@ -219,23 +212,23 @@ _shoutItOutAtSchoolc = shoutItOutLoud . (schoolRole "Kylie" "Minogue") <- Nuts
 _shoutItOutAtSchoolc = shoutItOutLoud . schoolRole "Kylie" $ "Minogue"
 -- "Minogue, Kylie !!!!!!!! <-- i'm shouting"
 
-_goBeserk2 = upper $ shoutItOutLoud $ guitars $ oilsRole "Minogue"
+_goBeserk2 = toUpper $ shoutItOutLoud $ guitars $ oilsRole "Minogue"
 -- "PETER HENDRIX !!!!!!!! <-- I'M SHOUTING"
--- _goBeserk2 = upper (shoutItOutLoud (guitars (oilsRole "Minogue")))
+-- _goBeserk2 = toUpper (shoutItOutLoud (guitars (oilsRole "Minogue")))
 
-_goBeserk3 = upper $ shoutItOutLoud . guitars $ oilsRole "Minogue"
+_goBeserk3 = toUpper $ shoutItOutLoud . guitars $ oilsRole "Minogue"
 -- "PETER HENDRIX !!!!!!!! <-- I'M SHOUTING"
--- _goBeserk3 = upper $ ((shoutItOutLoud . guitars) (oilsRole "Minogue"))
--- _goBeserk3 = upper $ (shoutItOutLoud . guitars (oilsRole "Minogue"))
+-- _goBeserk3 = toUpper $ ((shoutItOutLoud . guitars) (oilsRole "Minogue"))
+-- _goBeserk3 = toUpper $ (shoutItOutLoud . guitars (oilsRole "Minogue"))
 
-_goBeserk = upper . shoutItOutLoud . guitars $ oilsRole "Minogue"
+_goBeserk = toUpper . shoutItOutLoud . guitars $ oilsRole "Minogue"
 -- "PETER HENDRIX !!!!!!!! <-- I'M SHOUTING"
--- _goBeserk = (upper . shoutItOutLoud . guitars) (oilsRole "Minogue")
--- _goBeserk = upper . shoutItOutLoud . guitars (oilsRole "Minogue")
+-- _goBeserk = (toUpper . shoutItOutLoud . guitars) (oilsRole "Minogue")
+-- _goBeserk = toUpper . shoutItOutLoud . guitars (oilsRole "Minogue")
 
--- _goBeserkerr = upper . shoutItOutLoud . guitars . oilsRole "Minogue"
--- ERR * Couldn't match expected type `a -> String' with actual type `String'
+-- _goBeserkerr = toUpper . shoutItOutLoud . guitars . oilsRole "Minogue"
+-- ERR * Couldn't match expected type `a -> Text' with actual type `Text'
 
-_goBeserk0 = upper . shoutItOutLoud . guitars . oilsRole $ "Minogue"
+_goBeserk0 = toUpper . shoutItOutLoud . guitars . oilsRole $ "Minogue"
 -- "PETER HENDRIX !!!!!!!! <-- I'M SHOUTING"
--- _goBeserk00 = (upper . shoutItOutLoud . guitars . oilsRole) "Minogue"
+-- _goBeserk00 = (toUpper . shoutItOutLoud . guitars . oilsRole) "Minogue"

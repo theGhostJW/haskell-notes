@@ -1,7 +1,7 @@
 module RankNTypes where
 
-import           Foundation.Extended hiding (id, uncons)
-import qualified Prelude             as P
+
+import Prelude             as P hiding (id)
 import System.Random
 import Control.Monad.State
 
@@ -189,7 +189,7 @@ randomPlayer genR = do
     y <- genR (-100, 100)
 
     liftIO (putStrLn "Done.")
-    pure (Player (toStr name) (x, y))
+    pure (Player name (x, y))
 
 {-
   Notice how the function uses the fact that it receives a polymorphic

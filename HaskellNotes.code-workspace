@@ -7,5 +7,7 @@
 			"path": "C:\\HaskellNotesWiki"
 		}
 	],
-	"settings": {}
+	"settings": {
+		"workbench.colorCustomizations": {}
+	}
 }

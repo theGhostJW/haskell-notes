@@ -1,7 +1,6 @@
 module FunctionalDependencies where
 
-import           Foundation.Extended
-import qualified Prelude as P
+import Prelude as P
 import Control.Monad.State
 
 

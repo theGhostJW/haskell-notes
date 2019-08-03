@@ -1,7 +1,6 @@
 module GADTs where
 
-import           Foundation.Extended
-import qualified Prelude
+import Prelude
 --  !!!!   GADTs  !!!!!
 data Expr a where
   I   :: Int  -> Expr Int

@@ -88,14 +88,12 @@ library:
   source-dirs: src
   dependencies:
     - base >= 4.7 && < 5
-    - foundation
-    - basement
     - text
     - freer-simple
-    - principled-extended
     - containers
     - extra
     - transformers-either
     - random
     - mtl
     - polysemy
+    - pyrelude
